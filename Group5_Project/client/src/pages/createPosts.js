@@ -46,7 +46,7 @@ function CreatePosts() {
     formData.append('PostImage', image);
 
     try {
-      const response = await fetch('http://localhost:5000/api/post', {
+      const response = await fetch('https://tap-in.onrender.com/api/post', {
         method: 'POST',
         body: formData
       });
