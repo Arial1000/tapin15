@@ -17,7 +17,7 @@ function CreatePosts() {
   useEffect(() => {
     const fetchUsername = async () => {
       try {
-        const response = await fetch('http://localhost:5000/username_display', {
+        const response = await fetch('https://tap-in.onrender.com/username_display', {
           credentials: 'include',
         });
         const data = await response.json();

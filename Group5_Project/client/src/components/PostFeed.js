@@ -8,7 +8,7 @@ function PostFeed({ searchQuery }) {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await fetch('/api/post');
+        const response = await fetch('https://tap-in.onrender.com/api/post');
         const data = await response.json();
         setPosts(data);
       } catch (error) {

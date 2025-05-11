@@ -57,7 +57,7 @@ function SignUp() {
     try {
       const { username, email, password } = formData;
 
-      const response = await fetch('/api/user/signup', {
+      const response = await fetch('https://tap-in.onrender.com/api/user/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
