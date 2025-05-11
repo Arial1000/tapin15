@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../css/posts.css';
+import Sidebar from '../components/Sidebar';
 
 function CreatePosts() {
   const [subject, setSubject] = useState('');
@@ -71,6 +72,7 @@ function CreatePosts() {
 
   return (
     <div className="create-post-container">
+      <Sidebar/>
       <form onSubmit={handleSubmit}>
         <input 
           type="text" 

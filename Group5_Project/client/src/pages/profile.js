@@ -1,10 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import '../css/profile.css';
+import Sidebar from '../components/Sidebar';
+
 
 function Profile(){
     return(
         <div>
+        <Sidebar/>
         <img src="../images/default_profile_img.png" alt="User Profile"/> 
         <h2>Username</h2>
         <button>
