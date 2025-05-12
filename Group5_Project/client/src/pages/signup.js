@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-no-undef */
-import React, { useState } from 'react';
+import React, { useState} from 'react';
 import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate
 import validate from '../components/Validate';
 import '../css/sign_up.css';
@@ -35,7 +35,9 @@ function SignUp() {
     verifyPassword: '',
   });
   const [errors, setErrors] = useState({});
-  const navigate = useNavigate();  // Initialize useNavigate for redirection
+  const navigate = useNavigate();
+const [loading, setLoading] = useState(false);
+
 
   const handleChange = (e) => {
     setFormData({
@@ -44,42 +46,44 @@ function SignUp() {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-    const validationErrors = validate(formData, constraints);
-    
-    if (validationErrors) {
-      setErrors(validationErrors);
-      return;
+  const validationErrors = validate(formData, constraints);
+  if (!validationErrors) {
+    setErrors(validationErrors);
+    setLoading(false);
+    return;
+  }
+
+  try {
+    const { username, email, password } = formData;
+
+    const response = await fetch('/api/user/signup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ username, email, password }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+  alert(`Welcome, ${username}!`);
+  navigate('/home');
+    } else {
+      alert(data.message || 'Signup failed');
     }
-
-    try {
-      const { username, email, password } = formData;
-
-      const response = await fetch('https://tap-in.onrender.com/api/user/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          credentials: 'include',
-        },
-        body: JSON.stringify({ username, email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert(`Welcome, ${username}!`);
-        console.log("Home called");
-        navigate('/home');
-      } else {
-        alert(data.message || 'Signup failed');
-      }
-    } catch (error) {
-      console.error('Signup error:', error);
-      alert('An error occurred during signup.');
-    }
-  };
+  } catch (error) {
+    console.error('Signup error:', error);
+    alert('An error occurred during signup.');
+  } finally {
+    setLoading(false); // Always stop loading at the end
+  }
+};
 
   return (
     <div className="sign_Div">
@@ -126,7 +130,13 @@ function SignUp() {
           />
           {errors.verifyPassword && <p className="error">{errors.verifyPassword[0]}</p>}
 
-          <input className="block" id="submit" type="submit" value="Submit" />
+        <button
+  className="block"
+  type="submit"
+  disabled={loading}
+>
+  {loading ? 'Logging in...' : 'Submit'}
+</button>
         </fieldset>
       </form>
       <div className="alt">

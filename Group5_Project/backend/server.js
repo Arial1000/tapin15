@@ -8,6 +8,7 @@ const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
 const GridFsStorage = require('multer-gridfs-storage');
 const { GridFSBucket } = require('mongodb');
+const MongoStore = require('connect-mongo');
 
 const authRoutes = require('./routes/auth');
 const postRoutes = require('./routes/posts');
@@ -21,7 +22,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: 'https://tapin15.vercel.app',
+  origin: 'https://tapin15.vercel.app/',
   credentials: true
 }));
 app.use(express.json());
@@ -34,17 +35,22 @@ app.use(express.static(path.join(__dirname, '..', 'client', 'images')));
 
 
 app.use(session({
-  secret: 'your-secret-key',
+  
+  secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: true,
-  cookie: { 
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-  },
+  saveUninitialized: false,
+ // store: MongoStore.create({mongoUrl: 'mongodb+srv://tjoshu1:group5@cluster0.hkda6.mongodb.net/TapIn?retryWrites=true&w=majority&appName=Cluster0'}),
+ store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }), 
+ cookie: { 
+    sameSite: 'none',
+    secure: true,
+    httpOnly: true
+  }
 }));
 
 // MongoDB Connection
-mongoose.connect('mongodb+srv://tjoshu1:group5@cluster0.hkda6.mongodb.net/TapIn?retryWrites=true&w=majority&appName=Cluster0', {
+//mongoose.connect('mongodb+srv://tjoshu1:group5@cluster0.hkda6.mongodb.net/TapIn?retryWrites=true&w=majority&appName=Cluster0', {
+  mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
@@ -62,26 +68,6 @@ app.use('/api/post', postRoutes);   // post creation and retrieval
 app.get("/api", (req, res) => {
   res.json({ message: "Welcome to Tap in @TU Server!" });
 });
-
-// Create post via session (not used by frontend formData flow)
-app.post('/posts', async (req, res) => {
-  const userID = req.session.userId;
-  const student = await Student.findOne({ _id: userID });
-
-  if (!student) return res.status(404).send('User not found');
-
-  const { subject, content } = req.body;
-
-  try {
-    const post = new Post({ username: student.username, subject, content });
-    await post.save();
-    res.redirect('/home');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error saving post');
-  }
-});
-
 // Get current username (used for session-based UI updates)
 app.get('/username_display', async (req, res) => {
   //req.session.username = student.username;
@@ -124,60 +110,3 @@ app.get('/home', (req, res) => {
 app.post('/home', (req, res) => {
   res.redirect('/home');
 });
-
-// Login route
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const user = await Student.findOne({ email });
-
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid email or password' });
-    }
-
-    // Compare entered password with hashed password stored in DB
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid email or password' });
-    }
-
-    // Set session and send response
-    req.session.userId = user._id;
-    req.session.username = student.username;
-    console.log('Session set with userId:', user._id);
-
-    res.status(200).json({ message: 'Login successful', username: student.username });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// Signup route to hash passwords before saving them
-router.post('/signup', async (req, res) => {
-  const { username, email, password } = req.body;
-
-  try {
-    const existingUser = await Student.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'Email is already registered' });
-    }
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = new Student({
-      username,
-      email,
-      password: hashedPassword,
-    });
-
-    await newUser.save();
-    res.status(201).json({ message: 'User created successfully' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Error registering user' });
-  }
-});
-
-module.exports = app;

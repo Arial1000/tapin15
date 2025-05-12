@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import '../css/posts.css';
-import Sidebar from '../components/Sidebar';
 
 function CreatePosts() {
   const [subject, setSubject] = useState('');
@@ -71,8 +71,14 @@ function CreatePosts() {
   };
 
   return (
-    <div className="create-post-container">
-      <Sidebar/>
+    <div>
+        <div className="nav_bar">
+          <Link to="/Account">Account Settings</Link>
+          <Link to="/editprofile">Edit Profile</Link>
+          <Link to="/privacy">Privacy Settings</Link>
+          <Link to="/home">Home</Link>
+        </div>
+        <div className="create-post-container">
       <form onSubmit={handleSubmit}>
         <input 
           type="text" 
@@ -94,13 +100,16 @@ function CreatePosts() {
           accept="image/*" 
            name="PostImage"
         />
-        <button type="submit" disabled={isSubmitting}>
+        <Link to="/home">
+                  <button type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Creating Post...' : 'Create Post'}
         </button>
+        </Link>
       </form>
 
       {errorMessage && <p className="error-message">{errorMessage}</p>}
       {successMessage && <p className="success-message">{successMessage}</p>}
+    </div>
     </div>
   );
 }
