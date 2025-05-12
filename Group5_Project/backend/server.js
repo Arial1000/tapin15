@@ -8,6 +8,7 @@ const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
 const GridFsStorage = require('multer-gridfs-storage');
 const { GridFSBucket } = require('mongodb');
+const MongoStore = require('connect-mongo');
 
 const authRoutes = require('./routes/auth');
 const postRoutes = require('./routes/posts');
@@ -21,7 +22,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: 'https://tapin15.vercel.app',
+  origin: 'https://tapin15.vercel.app/',
   credentials: true
 }));
 app.use(express.json());
@@ -36,14 +37,13 @@ app.use(express.static(path.join(__dirname, '..', 'client', 'images')));
 app.use(session({
   secret: 'your-secret-key',
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
+  store: MongoStore.create({mongoUrl: 'mongodb+srv://tjoshu1:group5@cluster0.hkda6.mongodb.net/TapIn?retryWrites=true&w=majority&appName=Cluster0'}),
   cookie: { 
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    secure: true,     // requires HTTPS (which both Vercel + Render provide)
-    sameSite: 'none', // 👈 add this line for cross-site cookies
-    
-  },
+    sameSite: 'none',
+    secure: true,
+    httpOnly: true
+  }
 }));
 
 // MongoDB Connection
@@ -65,7 +65,6 @@ app.use('/api/post', postRoutes);   // post creation and retrieval
 app.get("/api", (req, res) => {
   res.json({ message: "Welcome to Tap in @TU Server!" });
 });
-
 // Get current username (used for session-based UI updates)
 app.get('/username_display', async (req, res) => {
   //req.session.username = student.username;
@@ -99,16 +98,6 @@ app.get('/post_display', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-router.post('/logout', (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.error('Logout error:', err);
-      return res.status(500).json({ message: 'Logout failed' });
-    }
-    res.clearCookie('connect.sid');
-    res.status(200).json({ message: 'Logout successful' });
-  });
-});
 
 // Placeholder routes
 app.get('/home', (req, res) => {
@@ -118,4 +107,3 @@ app.get('/home', (req, res) => {
 app.post('/home', (req, res) => {
   res.redirect('/home');
 });
-

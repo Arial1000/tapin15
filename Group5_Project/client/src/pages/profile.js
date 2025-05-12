@@ -6,31 +6,32 @@ import logo from '../images/default_profile_img.png';
 
 function Profile() {
     const [username, setUsername] = useState('');
-  
-  useEffect(() => {
-    fetch('https://tap-in.onrender.com/username_display', {
-      method: 'GET',
-      credentials: 'include',
+
+useEffect(() => {
+  fetch('http://localhost:5000/username_display', {
+    method: 'GET',
+    credentials: 'include',
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.username) {
+        setUsername(data.username);
+      }
     })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.username) {
-          setUsername(data.username);
-        }
-      })
-      .catch((err) => {
-        console.error('Error fetching username:', err);
-      });
-  }, []);
-  
-  return (
-    <div className="profile-container">
-      <div className="nav_bar">
-        <Link to="/Account">Account Settings</Link>
-        <Link to="/editprofile">Edit Profile</Link>
-        <Link to="/privacy">Privacy Settings</Link>
-        <Link to="/home">Home</Link>
+    .catch((err) => {
+      console.error('Error fetching username:', err);
+    });
+}, []);
+
+return (
+  <div className="profile-container">
+    <div className="nav_bar">
+      <Link to="/Account">Account Settings</Link>
+      <Link to="/editprofile">Edit Profile</Link>
+      <Link to="/privacy">Privacy Settings</Link>
+      <Link to="/home">Home</Link>
     </div>
+
     <img src={logo} alt="User Profile" />
     <h2><strong>{username}</strong></h2>
 
@@ -49,6 +50,7 @@ function Profile() {
     </div>
   </div>
 );
+
 }
 
 export default Profile;
