@@ -14,7 +14,7 @@ function PostFeed({ searchQuery }) {
         console.error('Error fetching posts:', error);
       }
     };
-
+//
     fetchPosts();
   }, [searchQuery]);
 
