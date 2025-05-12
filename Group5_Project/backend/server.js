@@ -40,6 +40,9 @@ app.use(session({
   cookie: { 
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
+    secure: true,     // requires HTTPS (which both Vercel + Render provide)
+    sameSite: 'none', // 👈 add this line for cross-site cookies
+    
   },
 }));
 
